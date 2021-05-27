@@ -1,10 +1,6 @@
 import tensorflow as tf
 import tensorflow.keras.layers as layers
-import keras.backend as K
 from tensorflow.python.keras.regularizers import l2
-
-from text_classification.config import Config
-from text_classification.loss import Margin_loss
 
 
 def get_model(self, summary=True):
