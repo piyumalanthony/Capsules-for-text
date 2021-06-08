@@ -23,6 +23,22 @@ def text_preprocessing(data):
     return comments_splitted, labels
 
 
+def text_preprocessing_sst(data):
+    comments = data['sentence']
+
+    comments_splitted = []
+    for comment in comments:
+        lines = []
+        try:
+            words = comment.split()
+            lines += words
+        except ValueError:
+            continue
+
+        comments_splitted.append(lines)
+    return comments_splitted
+
+
 def generate_embedding_matrix(word_embedding_keydvectors_path,
                               embedding_matrix_path,
                               vocab_size,
@@ -44,6 +60,40 @@ def generate_embedding_matrix(word_embedding_keydvectors_path,
     embedding_matrix = np.zeros((vocab_size, embedding_size))
     for word, i in tokenizer.word_index.items():
         embedding_vector = embeddings_index.get(word)
+        if embedding_vector is not None:
+            embedding_matrix[i] = embedding_vector
+
+    pickle.dump(embedding_matrix, open(embedding_matrix_path, 'wb'))
+    print("Successfully executed the embedding generation...")
+    return embedding_matrix
+
+
+def generate_embedding_matrix_glove(word_embedding_keydvectors_path,
+                                    embedding_matrix_path,
+                                    vocab_size,
+                                    embedding_size, tokenizer):
+    # if embedding_type == 'fasText':
+    #     word_embedding_model = FastText.load(word_embedding_path)
+    # else:
+    #     word_embedding_model = word2vec.Word2Vec.load(word_embedding_path)
+    #
+    # word_vectors = word_embedding_model.wv
+    # word_vectors.save(word_embedding_keydvectors_path)
+    word_vectors = open(word_embedding_keydvectors_path, encoding='utf8')
+    print("Running the embedding generation...")
+    embeddings_index = dict()
+    glove_dict = {}
+    with open(word_embedding_keydvectors_path, encoding='utf8') as f:
+        for line in f:
+            line = line.strip().split(' ')
+            word = line[0]
+            embedding = [float(x) for x in line[1:]]
+            glove_dict[word] = embedding
+
+    # create a weight matrix for words in training docs
+    embedding_matrix = np.zeros((vocab_size, embedding_size))
+    for word, i in tokenizer.word_index.items():
+        embedding_vector = glove_dict.get(word)
         if embedding_vector is not None:
             embedding_matrix[i] = embedding_vector
 

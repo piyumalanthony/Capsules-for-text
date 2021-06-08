@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from keras.preprocessing.sequence import pad_sequences
-from keras.preprocessing.text import Tokenizer
-from keras import utils
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras import utils
 
 from config import Config
-from network import get_model
+# from network import get_model
 from preprocessing import text_preprocessing, load_word_embedding_matrix, generate_embedding_matrix
 
 folder_path =  '/content/drive/My Drive/Final Year Project/FYP/Sentiment Analysis/Implementation/'
@@ -74,5 +74,5 @@ config = Config(
     y_test=y_test,
     pretrain_vec=embedding_matrix)
 
-model = get_model(config)
-model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), epochs=50)
+# model = get_model(config)
+# model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), epochs=50)

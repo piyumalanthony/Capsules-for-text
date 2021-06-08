@@ -5,19 +5,17 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras import utils
 
-# import ensemble_capsule_network
 import ensemble_capsule_network
-import network_test
 from config import Config
-# import network
+import network
 from preprocessing import text_preprocessing, load_word_embedding_matrix
 
-folder_path = "D:\\deep_learning_experiments"
-lankadeepa_data_path = folder_path + "\\sinhala_data\\lankadeepa_tagged_comments.csv"
-gossip_lanka_data_path = folder_path + "\\sinhala_data\\gossip_lanka_tagged_comments.csv"
+folder_path = "/userdirs/piyumal/sihala_data/"
+lankadeepa_data_path = folder_path + "lankadeepa_tagged_comments.csv"
+gossip_lanka_data_path = folder_path + "gossip_lanka_tagged_comments.csv"
 
-word_embedding_keyed_vectors_path = 'D:\\deep_learning_experiments\\word_vectors_sinhala\\keyed.kv'
-word_embedding_matrix_path = 'D:\\deep_learning_experiments\\word_embedding_matrix'
+# word_embedding_keyed_vectors_path = 'D:\\deep_learning_experiments\\word_vectors_sinhala\\keyed.kv'
+word_embedding_matrix_path = folder_path + 'word_embedding_matrix'
 EMBEDDING_SIZE = 300
 
 lankadeepa_data = pd.read_csv(lankadeepa_data_path)[:9059]
@@ -37,14 +35,7 @@ vocab_size = len(t.word_index) + 1
 print(vocab_size)
 
 encoded_docs = t.texts_to_sequences(comments_text)
-# for i in encoded_docs:
-#     print(len(i))
-# zzz = lambda z: len(z)
-lengths = list(map(lambda z: len(z), encoded_docs))
-print('###########################################')
-print(lengths)
-
-max_length = max(lengths)
+max_length = 30
 padded_docs = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 comment_labels = np.array(labels)
 comment_labels = utils.to_categorical(comment_labels)
@@ -78,5 +69,4 @@ config = Config(
     pretrain_vec=embedding_matrix)
 
 model = ensemble_capsule_network.ensemble_capsule_network(config)
-# model = network_test.get_model_from_text_layer(config)
 model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), epochs=100)

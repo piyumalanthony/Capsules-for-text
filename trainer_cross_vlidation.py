@@ -1,15 +1,12 @@
-import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+import pandas as pd
+from tensorflow.keras import utils
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras import utils
+from sklearn.model_selection import train_test_split, KFold
 
-# import ensemble_capsule_network
 import ensemble_capsule_network
-import network_test
 from config import Config
-# import network
 from preprocessing import text_preprocessing, load_word_embedding_matrix
 
 folder_path = "D:\\deep_learning_experiments"
@@ -37,14 +34,7 @@ vocab_size = len(t.word_index) + 1
 print(vocab_size)
 
 encoded_docs = t.texts_to_sequences(comments_text)
-# for i in encoded_docs:
-#     print(len(i))
-# zzz = lambda z: len(z)
-lengths = list(map(lambda z: len(z), encoded_docs))
-print('###########################################')
-print(lengths)
-
-max_length = max(lengths)
+max_length = 30
 padded_docs = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
 comment_labels = np.array(labels)
 comment_labels = utils.to_categorical(comment_labels)
@@ -63,7 +53,7 @@ print("Train lables shape: ", y_train.shape)
 
 # load embedding matrix
 embedding_matrix = load_word_embedding_matrix(word_embedding_matrix_path)
-
+kfold = KFold(n_splits=10, shuffle=True)
 # print(embedding_matrix[1])
 config = Config(
     seq_len=max_length,
@@ -77,6 +67,15 @@ config = Config(
     y_test=y_test,
     pretrain_vec=embedding_matrix)
 
-model = ensemble_capsule_network.ensemble_capsule_network(config)
-# model = network_test.get_model_from_text_layer(config)
-model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), epochs=100)
+inputs = padded_docs
+targets = comment_labels
+# training_dataset = get_training_dataset(images, labels)
+# validation_dataset = get_validation_dataset(images_val, labels_val)
+index = 1
+for train, test in kfold.split(inputs, targets):
+    print("Cross validation step:", index)
+    model = ensemble_capsule_network.ensemble_capsule_network(config)
+    model.fit(x=inputs[train], y=targets[train], validation_data=(inputs[test], targets[test]), epochs=50,
+              batch_size=config.batch_size)
+    index = index + 1
+    print("++++++++++++++++++++++++++++++")
